@@ -1,0 +1,17 @@
+[workspace]
+members = ["crates/gpui-ffi"]
+resolver = "2"
+
+[workspace.dependencies]
+gpui = { git = "https://github.com/zed-industries/zed.git", rev = "8d932b0e0671645500b567cd474cb113085638fd" }
+gpui_platform = { git = "https://github.com/zed-industries/zed.git", rev = "8d932b0e0671645500b567cd474cb113085638fd", features = ["font-kit", "wayland", "x11"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 2

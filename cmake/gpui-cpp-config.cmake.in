@@ -1,0 +1,32 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+if(NOT APPLE AND NOT WIN32)
+    find_dependency(Threads)
+    find_dependency(Freetype)
+    find_dependency(Fontconfig)
+    find_dependency(PkgConfig)
+    pkg_check_modules(XKB REQUIRED IMPORTED_TARGET xkbcommon xkbcommon-x11 xcb)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/gpui-cpp-targets.cmake")
+
+if(TARGET gpui::cpp AND NOT TARGET gpui::ffi_static)
+    find_library(GPUI_FFI_LIBRARY
+        NAMES gpui_ffi libgpui_ffi
+        PATHS "${PACKAGE_PREFIX_DIR}/lib" "${PACKAGE_PREFIX_DIR}/lib64"
+        NO_DEFAULT_PATH)
+    if(GPUI_FFI_LIBRARY)
+        add_library(gpui::ffi_static STATIC IMPORTED)
+        set_target_properties(gpui::ffi_static PROPERTIES
+            IMPORTED_LOCATION "${GPUI_FFI_LIBRARY}")
+        target_link_libraries(gpui::cpp INTERFACE gpui::ffi_static)
+    else()
+        message(WARNING
+            "gpui-cpp: installed Rust static library (gpui_ffi) not found. "
+            "Prefer consuming gpui-cpp via FetchContent/add_subdirectory.")
+    endif()
+endif()
+
+check_required_components(gpui-cpp)
